@@ -59,13 +59,14 @@ class ERFNetWrapper:
 
 class ERFNetRos:
     def __init__(self):
-        self.erfnet_ = ERFNetWrapper('../models/model_best.pth')
+        self.gen_viz_ = rospy.get_param("~gen_viz", default=False)
+        self.model_path_ = rospy.get_param("~model_path", default="../models/model_best.pth")
 
-        self.gen_viz_ = rospy.get_param("gen_viz", default=False)
+        self.erfnet_ = ERFNetWrapper(self.model_path_)
 
-        self.image_sub_ = rospy.Subscriber('/asoom/keyframe_img', Image, self.imageCallback, queue_size=100)
-        self.label_pub_ = rospy.Publisher('/asoom/sem', Image, queue_size=10)
-        self.label_viz_pub_ =rospy.Publisher('label_viz', Image, queue_size=1)
+        self.image_sub_ = rospy.Subscriber('~image', Image, self.imageCallback, queue_size=100)
+        self.label_pub_ = rospy.Publisher('~label', Image, queue_size=10)
+        self.label_viz_pub_ =rospy.Publisher('~label_viz', Image, queue_size=1)
 
     def imageCallback(self, img_msg):
         img = np.frombuffer(img_msg.data, dtype=np.uint8).reshape(img_msg.height, img_msg.width, -1)
