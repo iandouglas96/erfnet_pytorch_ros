@@ -50,11 +50,12 @@ class ERFNetWrapper:
             outputs = self.model_(img)
 
         label = outputs[0].max(0)[1].byte().cpu().data
-        label_np = cv2.resize(label.numpy(), original_size)
+        label_np = cv2.resize(label.numpy(), original_size, interpolation = cv2.INTER_NEAREST)
         label_color_np = None
         if gen_viz:
             label_color = Colorize()(label.unsqueeze(0))
-            label_color_np = cv2.resize(label_color.numpy().transpose(1, 2, 0), original_size)
+            label_color_np = cv2.resize(label_color.numpy().transpose(1, 2, 0), original_size, 
+                                        interpolation = cv2.INTER_NEAREST)
         return label_np, label_color_np
 
 class ERFNetRos:
