@@ -17,7 +17,7 @@ import rospy
 from sensor_msgs.msg import Image
 
 NUM_CHANNELS = 3
-NUM_CLASSES = 4
+NUM_CLASSES = 5
 
 class ERFNetWrapper:
     def __init__(self, weights_path):
@@ -72,7 +72,7 @@ class ERFNetRos:
     def imageCallback(self, img_msg):
         img = np.frombuffer(img_msg.data, dtype=np.uint8).reshape(img_msg.height, img_msg.width, -1)
         label, label_color = self.erfnet_.infer(img, self.gen_viz_)
-        if label_color:
+        if label_color is not None:
             label_color = np.flip(label_color, axis=2)
             label_viz_msg = Image()
             label_viz_msg.header = img_msg.header
