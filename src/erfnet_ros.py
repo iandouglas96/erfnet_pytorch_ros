@@ -21,7 +21,7 @@ NUM_CHANNELS = 3
 NUM_CLASSES = 5
 
 class ERFNetWrapper:
-    def __init__(self, weights_path, gpu=True):
+    def __init__(self, weights_path, gpu=True, num_threads=-1):
         print ("Loading weights: " + weights_path)
         print ("Using GPU: " + str(gpu))
 
@@ -29,6 +29,8 @@ class ERFNetWrapper:
         if self.gpu_:
             self.device_ = torch.device('cuda')
         else:
+            if num_threads > 0:
+                torch.set_num_threads(num_threads)
             self.device_ = torch.device('cpu')
 
         self.model_ = ERFNet(NUM_CLASSES).to(self.device_)
@@ -69,9 +71,10 @@ class ERFNetRos:
     def __init__(self):
         self.gen_viz_ = rospy.get_param("~gen_viz", default=False)
         gpu = rospy.get_param("~gpu", default=True)
+        num_threads = rospy.get_param("~num_threads", default=-1)
         self.model_path_ = rospy.get_param("~model_path", default="../models/model_best.pth")
 
-        self.erfnet_ = ERFNetWrapper(self.model_path_, gpu)
+        self.erfnet_ = ERFNetWrapper(self.model_path_, gpu, num_threads)
 
         self.image_sub_ = rospy.Subscriber('~image', Image, self.imageCallback, queue_size=100)
         self.label_pub_ = rospy.Publisher('~label', Image, queue_size=10)
