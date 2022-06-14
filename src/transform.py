@@ -15,6 +15,8 @@ def colormap_penn(n):
     cmap[2,:] = np.array([255,0,0])
     cmap[3,:] = np.array([0,100,0])
     cmap[4,:] = np.array([0,255,255])
+    cmap[5,:] = np.array([255,0,255])
+    cmap[6,:] = np.array([0,100,100])
     
     return cmap
 
