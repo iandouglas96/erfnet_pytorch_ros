@@ -18,7 +18,7 @@ import rospy
 from sensor_msgs.msg import Image
 
 NUM_CHANNELS = 3
-NUM_CLASSES = 5
+NUM_CLASSES = 7
 
 class ERFNetWrapper:
     def __init__(self, weights_path, gpu=True, num_threads=-1):

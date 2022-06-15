@@ -3,7 +3,7 @@
 import torch
 from erfnet import ERFNet
 
-NUM_CLASSES = 5
+NUM_CLASSES = 7
 model_ = torch.nn.DataParallel(ERFNet(NUM_CLASSES)).cuda()
 
 def load_my_state_dict(model, state_dict):  #custom function to load model when not all dict elements
