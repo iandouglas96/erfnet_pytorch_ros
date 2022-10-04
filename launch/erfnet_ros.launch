@@ -5,6 +5,7 @@
   <node pkg="erfnet_pytorch_ros" type="erfnet_ros.py" name="erfnet_ros" output="screen">
     <param name="model_path" value="$(find erfnet_pytorch_ros)/models/model_generic.pth"/>
     <param name="gen_viz" value="True"/>
+    <param name="world_config_path" value="$(find semantics_manager)/config/config.yaml"/>
 
     <remap from="~image" to="/asoom/img"/>
     <remap from="~label" to="/asoom/sem"/>

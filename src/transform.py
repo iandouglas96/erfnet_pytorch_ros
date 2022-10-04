@@ -5,49 +5,18 @@
 
 import numpy as np
 import torch
+import yaml
 
 from PIL import Image
 
-def colormap_penn(n):
+def colormap_from_file(n, filepath):
+    class_config = yaml.load(open(filepath, 'r'), Loader=yaml.CLoader)
     cmap=np.zeros([n, 3]).astype(np.uint8)
-    cmap[0,:] = np.array([0,0,255])
-    cmap[1,:] = np.array([0,255,0])
-    cmap[2,:] = np.array([255,0,0])
-    cmap[3,:] = np.array([0,100,0])
-    cmap[4,:] = np.array([0,255,255])
-    cmap[5,:] = np.array([255,0,255])
-    cmap[6,:] = np.array([0,100,100])
+
+    for index, class_data in enumerate(class_config):
+        cmap[index,:] = np.array(class_data["color"])
     
-    return cmap
-
-def colormap_cityscapes(n):
-    cmap=np.zeros([n, 3]).astype(np.uint8)
-    cmap[0,:] = np.array([128, 64,128])
-    cmap[1,:] = np.array([244, 35,232])
-    cmap[2,:] = np.array([ 70, 70, 70])
-    cmap[3,:] = np.array([ 102,102,156])
-    cmap[4,:] = np.array([ 190,153,153])
-    cmap[5,:] = np.array([ 153,153,153])
-
-    cmap[6,:] = np.array([ 250,170, 30])
-    cmap[7,:] = np.array([ 220,220,  0])
-    cmap[8,:] = np.array([ 107,142, 35])
-    cmap[9,:] = np.array([ 152,251,152])
-    cmap[10,:] = np.array([ 70,130,180])
-
-    cmap[11,:] = np.array([ 220, 20, 60])
-    cmap[12,:] = np.array([ 255,  0,  0])
-    cmap[13,:] = np.array([ 0,  0,142])
-    cmap[14,:] = np.array([  0,  0, 70])
-    cmap[15,:] = np.array([  0, 60,100])
-
-    cmap[16,:] = np.array([  0, 80,100])
-    cmap[17,:] = np.array([  0,  0,230])
-    cmap[18,:] = np.array([ 119, 11, 32])
-    cmap[19,:] = np.array([ 0,  0,  0])
-    
-    return cmap
-
+    return cmap, len(class_config)
 
 def colormap(n):
     cmap=np.zeros([n, 3]).astype(np.uint8)
@@ -84,11 +53,8 @@ class ToLabel:
 
 class Colorize:
 
-    def __init__(self, n=22):
-        #self.cmap = colormap(256)
-        #self.cmap = colormap_cityscapes(256)
-        self.cmap = colormap_penn(256)
-        self.cmap[n] = self.cmap[-1]
+    def __init__(self, filepath, n=256):
+        self.cmap, self.num_classes = colormap_from_file(n, filepath)
         self.cmap = torch.from_numpy(self.cmap[:n])
 
     def __call__(self, gray_image):
