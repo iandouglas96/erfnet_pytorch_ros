@@ -122,7 +122,7 @@ class ERFNetRos:
             intermed_msg.encoding = "32FC16"
             intermed_msg.height = intermed.shape[0]
             intermed_msg.width = intermed.shape[1]
-            intermed_msg.step = intermed_msg.width * intermed.shape[-1]
+            intermed_msg.step = intermed_msg.width * 4 * intermed.shape[-1]
             intermed_msg.data = intermed.tobytes()
             self.intermed_pub_.publish(intermed_msg)
 

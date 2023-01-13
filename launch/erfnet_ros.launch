@@ -20,5 +20,6 @@
 
     <remap from="~image" to="/asoom/keyframe_img"/>
     <remap from="~label" to="/asoom/sem"/>
+    <remap from="~intermed" to="/asoom/intermed"/>
   </node>
 </launch>
