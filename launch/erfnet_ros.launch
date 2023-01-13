@@ -5,6 +5,7 @@
 
   <arg name="model_path" default="$(find erfnet_pytorch_ros)/models/model_generic.pth"/>
   <arg name="gen_viz" default="False"/>
+  <arg name="pub_intermed" default="True"/>
   <arg name="gpu" default="False"/>
   <arg name="num_threads" default="6"/>
 
@@ -13,6 +14,7 @@
 
     <param name="model_path" value="$(arg model_path)"/>
     <param name="gen_viz" value="$(arg gen_viz)"/>
+    <param name="pub_intermed" value="$(arg pub_intermed)"/>
     <param name="gpu" value="$(arg gpu)"/>
     <param name="num_threads" value="$(arg num_threads)"/>
 

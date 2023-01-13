@@ -55,7 +55,7 @@ class ERFNetWrapper:
         rospy.loginfo("[ErfNet] Model and weights LOADED successfully")
         self.model_.eval()
 
-    def infer(self, img_np, gen_viz = False):
+    def infer(self, img_np, gen_viz = False, gen_intermed = False):
         original_size = (img_np.shape[1], img_np.shape[0])
         img_np = cv2.resize(img_np, (640, 400))
         # BGR to RGB
@@ -64,7 +64,7 @@ class ERFNetWrapper:
         img = torch.from_numpy(img_np[None, :]).to(self.device_)
 
         with torch.no_grad():
-            outputs = self.model_(img)
+            outputs, intermed = self.model_(img)
 
         label = outputs[0].max(0)[1].byte().cpu().data
         label_np = cv2.resize(label.numpy(), original_size, interpolation = cv2.INTER_NEAREST)
@@ -73,11 +73,18 @@ class ERFNetWrapper:
             label_color = self.colorizer_(label.unsqueeze(0))
             label_color_np = cv2.resize(label_color.numpy().transpose(1, 2, 0), original_size, 
                                         interpolation = cv2.INTER_NEAREST)
-        return label_np, label_color_np
+
+        intermed_np = None
+        if gen_intermed:
+            intermed_np = cv2.resize(intermed[0].cpu().numpy().transpose(1, 2, 0), 
+                                     original_size, interpolation = cv2.INTER_NEAREST)
+
+        return label_np, label_color_np, intermed_np
 
 class ERFNetRos:
     def __init__(self):
         self.gen_viz_ = rospy.get_param("~gen_viz", default=False)
+        self.pub_intermed_ = rospy.get_param("~pub_intermed", default=False)
         gpu = rospy.get_param("~gpu", default=True)
         num_threads = rospy.get_param("~num_threads", default=-1)
         model_path = rospy.get_param("~model_path", default="../models/model_best.pth")
@@ -90,12 +97,14 @@ class ERFNetRos:
 
         self.image_sub_ = rospy.Subscriber('~image', Image, self.imageCallback, queue_size=100)
         self.label_pub_ = rospy.Publisher('~label', Image, queue_size=10)
-        self.label_viz_pub_ =rospy.Publisher('~label_viz', Image, queue_size=1)
+        self.label_viz_pub_ = rospy.Publisher('~label_viz', Image, queue_size=1)
+        self.intermed_pub_ = rospy.Publisher('~intermed', Image, queue_size=1)
 
     def imageCallback(self, img_msg):
         start_t = time.time()
         img = np.frombuffer(img_msg.data, dtype=np.uint8).reshape(img_msg.height, img_msg.width, -1)
-        label, label_color = self.erfnet_.infer(img, self.gen_viz_)
+        label, label_color, intermed = self.erfnet_.infer(img, self.gen_viz_, self.pub_intermed_)
+
         if label_color is not None:
             label_color = np.flip(label_color, axis=2)
             label_viz_msg = Image()
@@ -106,6 +115,16 @@ class ERFNetRos:
             label_viz_msg.step = label_viz_msg.width * 3
             label_viz_msg.data = label_color.tobytes()
             self.label_viz_pub_.publish(label_viz_msg)
+
+        if intermed is not None:
+            intermed_msg = Image()
+            intermed_msg.header = img_msg.header
+            intermed_msg.encoding = "32FC16"
+            intermed_msg.height = intermed.shape[0]
+            intermed_msg.width = intermed.shape[1]
+            intermed_msg.step = intermed_msg.width * intermed.shape[-1]
+            intermed_msg.data = intermed.tobytes()
+            self.intermed_pub_.publish(intermed_msg)
 
         label_msg = Image()
         label_msg.header = img_msg.header

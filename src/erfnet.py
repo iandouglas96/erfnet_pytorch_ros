@@ -129,9 +129,7 @@ class Decoder (nn.Module):
         for layer in self.layers:
             output = layer(output)
 
-        output = self.output_conv(output)
-
-        return output
+        return self.output_conv(output), output
 
 
 class ERFNet(nn.Module):
