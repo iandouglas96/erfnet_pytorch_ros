@@ -6,7 +6,7 @@
   <arg name="model_path" default="$(find erfnet_pytorch_ros)/models/model_generic.pth"/>
   <arg name="gen_viz" default="False"/>
   <arg name="gpu" default="False"/>
-  <arg name="num_threads" default="6"/>
+  <arg name="num_threads" default="4"/>
 
   <node pkg="erfnet_pytorch_ros" type="erfnet_ros.py" name="erfnet_ros" output="$(arg output)">
     <param name="world_config_path" value="$(arg world_config_path)"/>

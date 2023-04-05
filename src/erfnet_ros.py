@@ -25,6 +25,7 @@ class ERFNetWrapper:
     def __init__(self, weights_path, class_lut_path, gpu=True, num_threads=-1):
         rospy.loginfo("[ErfNet] Loading weights: " + weights_path)
         rospy.loginfo("[ErfNet] Using GPU: " + str(gpu))
+        rospy.loginfo("[ErfNet] CPU Threads: " + str(num_threads))
 
         self.colorizer_ = Colorize(class_lut_path)
 
@@ -36,6 +37,7 @@ class ERFNetWrapper:
                 torch.set_num_threads(num_threads)
             self.device_ = torch.device('cpu')
 
+        torch.backends.cudnn.benchmark = True
         saved_model_dict = torch.load(weights_path, map_location=self.device_)
         output_size = saved_model_dict[list(saved_model_dict.keys())[-1]].shape[0]
         if output_size != self.colorizer_.num_classes:
